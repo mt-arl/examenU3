@@ -1,0 +1,274 @@
+{
+  "_type": "export",
+  "__exportVersion": 4,
+  "__exportDate": "2026-02-09T12:00:00.000Z",
+  "__exportSource": "insomnia.desktop",
+  "resources": [
+    {
+      "_id": "wrk_booking",
+      "_type": "workspace",
+      "parentId": null,
+      "modified": 1644000000000,
+      "created": 1644000000000,
+      "name": "Booking Service GraphQL",
+      "description": "GraphQL API for hotel reservations"
+    },
+    {
+      "_id": "env_local",
+      "_type": "environment",
+      "parentId": "wrk_booking",
+      "modified": 1644000000000,
+      "created": 1644000000000,
+      "name": "Local Development",
+      "data": {
+        "base_url": "http://localhost:5000",
+        "graphql_endpoint": "http://localhost:5000/graphql",
+        "jwt_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ1c2VyLTEyMyIsImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsImlhdCI6MTY0NDAwMDAwMH0.EXAMPLE_JWT_TOKEN"
+      }
+    },
+    {
+      "_id": "env_k8s",
+      "_type": "environment",
+      "parentId": "wrk_booking",
+      "modified": 1644000000000,
+      "created": 1644000000000,
+      "name": "Kubernetes",
+      "data": {
+        "base_url": "http://localhost:5000",
+        "graphql_endpoint": "http://localhost:5000/graphql",
+        "jwt_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ1c2VyLTEyMyIsImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsImlhdCI6MTY0NDAwMDAwMH0.EXAMPLE_JWT_TOKEN"
+      }
+    },
+    {
+      "_id": "fld_queries",
+      "_type": "request_group",
+      "parentId": "wrk_booking",
+      "modified": 1644000000000,
+      "created": 1644000000000,
+      "name": "Queries"
+    },
+    {
+      "_id": "fld_mutations",
+      "_type": "request_group",
+      "parentId": "wrk_booking",
+      "modified": 1644000000000,
+      "created": 1644000000000,
+      "name": "Mutations"
+    },
+    {
+      "_id": "fld_health",
+      "_type": "request_group",
+      "parentId": "wrk_booking",
+      "modified": 1644000000000,
+      "created": 1644000000000,
+      "name": "Health Checks"
+    },
+    {
+      "_id": "req_health_check",
+      "_type": "request",
+      "parentId": "fld_health",
+      "modified": 1644000000000,
+      "created": 1644000000000,
+      "url": "{{ base_url }}/health",
+      "name": "Health Check",
+      "description": "Check service health status",
+      "method": "GET",
+      "body": {}
+    },
+    {
+      "_id": "req_health_ready",
+      "_type": "request",
+      "parentId": "fld_health",
+      "modified": 1644000000000,
+      "created": 1644000000000,
+      "url": "{{ base_url }}/health/ready",
+      "name": "Readiness Check",
+      "description": "Kubernetes readiness probe",
+      "method": "GET",
+      "body": {}
+    },
+    {
+      "_id": "req_health_alive",
+      "_type": "request",
+      "parentId": "fld_health",
+      "modified": 1644000000000,
+      "created": 1644000000000,
+      "url": "{{ base_url }}/health/alive",
+      "name": "Liveness Check",
+      "description": "Kubernetes liveness probe",
+      "method": "GET",
+      "body": {}
+    },
+    {
+      "_id": "req_query_bookings",
+      "_type": "request",
+      "parentId": "fld_queries",
+      "modified": 1644000000000,
+      "created": 1644000000000,
+      "url": "{{ graphql_endpoint }}",
+      "name": "List All Bookings",
+      "description": "Get all bookings for authenticated user",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\"query\": \"query {\\n  bookings {\\n    id\\n    fecha\\n    fechaFormateada\\n    servicio\\n    estado\\n    createdAt\\n  }\\n}\"}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ jwt_token }}"
+        }
+      ]
+    },
+    {
+      "_id": "req_query_proximas",
+      "_type": "request",
+      "parentId": "fld_queries",
+      "modified": 1644000000000,
+      "created": 1644000000000,
+      "url": "{{ graphql_endpoint }}",
+      "name": "Next 5 Bookings",
+      "description": "Get next 5 active bookings (fecha >= today)",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\"query\": \"query {\\n  proximasReservas {\\n    id\\n    fecha\\n    fechaFormateada\\n    servicio\\n    estado\\n  }\\n}\"}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ jwt_token }}"
+        }
+      ]
+    },
+    {
+      "_id": "req_query_booking",
+      "_type": "request",
+      "parentId": "fld_queries",
+      "modified": 1644000000000,
+      "created": 1644000000000,
+      "url": "{{ graphql_endpoint }}",
+      "name": "Get Specific Booking",
+      "description": "Get booking by ID (must belong to user)",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\"query\": \"query {\\n  booking(id: \\\"REPLACE_WITH_BOOKING_ID\\\") {\\n    id\\n    fecha\\n    fechaFormateada\\n    servicio\\n    estado\\n    canceladaEn\\n    createdAt\\n  }\\n}\"}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ jwt_token }}"
+        }
+      ]
+    },
+    {
+      "_id": "req_query_health_graphql",
+      "_type": "request",
+      "parentId": "fld_queries",
+      "modified": 1644000000000,
+      "created": 1644000000000,
+      "url": "{{ graphql_endpoint }}",
+      "name": "Health (GraphQL Query)",
+      "description": "Check service health via GraphQL",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\"query\": \"query {\\n  health\\n}\"}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ]
+    },
+    {
+      "_id": "req_mutation_create",
+      "_type": "request",
+      "parentId": "fld_mutations",
+      "modified": 1644000000000,
+      "created": 1644000000000,
+      "url": "{{ graphql_endpoint }}",
+      "name": "Create Booking",
+      "description": "Create a new hotel booking",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\"query\": \"mutation {\\n  createBooking(\\n    fecha: \\\"2026-02-15T10:00:00\\\"\\n    servicio: \\\"Suite Deluxe\\\"\\n  ) {\\n    id\\n    fecha\\n    fechaFormateada\\n    servicio\\n    estado\\n    createdAt\\n  }\\n}\"}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ jwt_token }}"
+        }
+      ]
+    },
+    {
+      "_id": "req_mutation_cancel",
+      "_type": "request",
+      "parentId": "fld_mutations",
+      "modified": 1644000000000,
+      "created": 1644000000000,
+      "url": "{{ graphql_endpoint }}",
+      "name": "Cancel Booking",
+      "description": "Cancel a booking (keeps max 5 cancelled per user)",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\"query\": \"mutation {\\n  cancelarReserva(id: \\\"REPLACE_WITH_BOOKING_ID\\\") {\\n    id\\n    estado\\n    canceladaEn\\n    fechaFormateada\\n  }\\n}\"}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ jwt_token }}"
+        }
+      ]
+    },
+    {
+      "_id": "req_mutation_delete",
+      "_type": "request",
+      "parentId": "fld_mutations",
+      "modified": 1644000000000,
+      "created": 1644000000000,
+      "url": "{{ graphql_endpoint }}",
+      "name": "Delete Booking",
+      "description": "Delete a booking permanently",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\"query\": \"mutation {\\n  deleteBooking(id: \\\"REPLACE_WITH_BOOKING_ID\\\")\\n}\"}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ jwt_token }}"
+        }
+      ]
+    }
+  ]
+}

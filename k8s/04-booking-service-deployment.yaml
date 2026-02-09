@@ -1,0 +1,103 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: booking-service
+  namespace: reservas-app
+spec:
+  ports:
+    - port: 5000
+      targetPort: 5000
+      protocol: TCP
+  selector:
+    app: booking-service
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: booking-service
+  namespace: reservas-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: booking-service
+  template:
+    metadata:
+      labels:
+        app: booking-service
+    spec:
+      serviceAccountName: booking-service
+      containers:
+        - name: booking-service
+          image: m4tt1619/booking-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
+              name: http
+          env:
+            - name: PORT
+              value: "5000"
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: booking-service-config
+                  key: NODE_ENV
+            - name: APOLLO_DEBUG
+              valueFrom:
+                configMapKeyRef:
+                  name: booking-service-config
+                  key: APOLLO_DEBUG
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: booking-service-secrets
+                  key: JWT_SECRET
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: DATABASE_URL
+            - name: USER_SERVICE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: booking-service-secrets
+                  key: USER_SERVICE_URL
+            - name: NOTIFICATION_SERVICE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: booking-service-secrets
+                  key: NOTIFICATION_SERVICE_URL
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          # Readiness probe - checks if service is ready to receive traffic
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 5000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          # Liveness probe - checks if service should be restarted
+          livenessProbe:
+            httpGet:
+              path: /health/alive
+              port: 5000
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          # Startup probe - allows time for app to start
+          startupProbe:
+            httpGet:
+              path: /health/alive
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 30

@@ -1,0 +1,25 @@
+type Booking {
+  id: ID!
+  userId: String!
+  fecha: String!
+  fechaFormateada: String!
+  servicio: String!
+  estado: String!
+  canceladaEn: String
+}
+
+type Query {
+  listBookings: [Booking]
+  nextBookings: [Booking]
+}
+
+type Mutation {
+  createBooking(fecha: String!, servicio: String!): Booking
+  cancelBooking(id: ID!): MessageResponse
+  deleteBooking(id: ID!): MessageResponse
+}
+
+type MessageResponse {
+  message: String!
+  success: Boolean!
+}

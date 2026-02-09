@@ -1,0 +1,42 @@
+// prisma/schema.prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String     @id @default(cuid())
+  externalId String   @unique // UUID from user-service
+  email     String    @unique
+  nombre    String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  bookings  Booking[]
+
+  @@index([externalId])
+}
+
+model Booking {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fecha       DateTime
+  servicio    String
+  estado      BookingStatus @default(ACTIVO)
+  canceladaEn DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([estado])
+  @@index([fecha])
+}
+
+enum BookingStatus {
+  ACTIVO
+  CANCELADA
+}

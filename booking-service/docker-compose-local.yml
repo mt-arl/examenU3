@@ -1,0 +1,53 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: booking-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: booking_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # AÑADE ESTO:
+    networks:
+      - reservas-network
+
+  booking-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: booking-service
+    environment:
+      # El host "postgres" ahora sí será visible
+      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/booking_db"
+      PORT: 5000
+      NODE_ENV: development
+      JWT_SECRET: dev-secret-key-change-in-production
+      USER_SERVICE_URL: http://user-service:5003
+      NOTIFICATION_SERVICE_URL: http://notification-service:5002
+      APOLLO_DEBUG: "true"
+    ports:
+      - "5001:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./src:/app/src
+      - ./prisma:/app/prisma
+    command: npm run dev
+    networks:
+      - reservas-network
+
+volumes:
+  postgres_data:
+
+networks:
+  reservas-network:
+    driver: bridge
